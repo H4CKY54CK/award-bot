@@ -266,16 +266,6 @@ class KarmaCheck(Login):
         return False
 
 
-
-
-r"[a-zA-Z0-9!#$%&'()*+,-\./:;<=>?@_{|}~]+"
-
-r'[a-zA-Z0-9!#$%&*+,-\./:;<=>?@_{|}~]+'
-
-
-
-
-
     def process_message(self, msg):
         """Flair assignment."""
 
