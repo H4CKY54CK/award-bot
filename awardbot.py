@@ -2,10 +2,10 @@
 
 # Keyword to trigger the bot
 trigger = "!award"
-# Path to error logfile. The first thing the bot does is change directory to it's own current location, so the path can be relative.
-error_log = "error_log.txt"
-# Path to regular logfile. The first thing the bot does is change directory to it's own current location, so the path can be relative.
-log_file = "award_log.txt"
+# Path to error logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
+error_log = "/home/hacky/error_log.txt"
+# Path to regular logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
+log_file = "/home/hacky/award_log.txt"
 # How much karma is required for self posts / text posts to trigger a level up.
 karma_limit = 100
 # How far back to look for submissions over the karma limit. One of: "hour", "day", "week", "month", "year", but month and year aren't reliable in your case.
