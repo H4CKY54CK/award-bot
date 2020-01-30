@@ -45,7 +45,7 @@ so something like `linux:awardbot1:comments:misanthropy::owner:/u/tehtrb` and `l
 
 Since it's an `.ini` file, you won't need quotes or anything surrounding the fields. It can be `username=myusername` or `username = myusername`, or I think it can even be `username:myusername`, but I know for sure equals signs work, so let's stick with what we know.
 
-Take `site1` and `site2` and stick them in lines 293 & 298. It should look like `CommentsStream('sitenumberone').collect()` and `KarmaCheck('sitenumbertwo').check_subs_and_inbox()`. It doesn't matter which one, but only input the string, and don't move anything around. Everything should just work without any meddling.
+Take `site1` and `site2` and stick them where I left `PLACEHOLDER`s. It should look like `CommentsStream('sitenumberone').collect()` and `KarmaCheck('sitenumbertwo').check_subs_and_inbox()`. It doesn't matter which one, but only input the string, and don't move anything around. Everything should just work without any meddling.
 
 To start the bot, you could call `python3 awardbot.py &` or install it as a service, as I'm sure you'll do. Keep an eye on their process IDs, in case they change. It should write to the `error_log.txt` if that happens anyway. so as long as you check occasionally for one or the other, that's good enough. I can't see it crashing that often, if at all, but I could be wrong. It's been known to happen.
 
