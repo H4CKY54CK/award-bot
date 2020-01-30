@@ -266,11 +266,24 @@ class KarmaCheck(Login):
         return False
 
 
+
+
+r"[a-zA-Z0-9!#$%&'()*+,-\./:;<=>?@_{|}~]+"
+
+r'[a-zA-Z0-9!#$%&*+,-\./:;<=>?@_{|}~]+'
+
+
+
+
+
     def process_message(self, msg):
         """Flair assignment."""
 
-        flair_class = '' or None
+        valid = r"[a-zA-Z0-9!#$%&'()*+,-\./:;<=>?@_{|}~]+"
         author = str(msg.author)
+        flair_class = '' or None
+        body = msg.body
+        valid_body = re.match(valid, body)
 
         # Split by newlines, into a list
         content = msg.body.split('\n')
@@ -284,23 +297,30 @@ class KarmaCheck(Login):
 
         # If there's only one item in list, it's fine. Assign it. Respond, mark read.
         elif len(content) == 1:
-            new_flair = content[0].rstrip()[:64]
 
-            # If their flair is longer than the limit, assign it, but tell them about it.
-            if len(msg.body) > 64:
-                self.subreddit.flair.set(author, new_flair, flair_class)
-                msg.reply(MESSAGE_CODES['E03'])
-                with open(LOG_FILE, 'a') as f:
-                    f.write(f"{time.time()}: Private message from `{author}` processed (however, their flair got shortened due to the length of their message). Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+            if valid_body:
+                new_flair = content[0].rstrip()[:64]
 
-            # If it's not longer than the limit, assign it, respond with an 'okie dokie'.
+                # If their flair is longer than the limit, assign it, but tell them about it.
+                if len(msg.body) > 64:
+                    self.subreddit.flair.set(author, new_flair, flair_class)
+                    msg.reply(MESSAGE_CODES['E03'])
+                    with open(LOG_FILE, 'a') as f:
+                        f.write(f"{time.time()}: Private message from `{author}` processed (however, their flair got shortened due to the length of their message). Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+                    msg.mark_read()
+
+                # If it's not longer than the limit, assign it, respond with an 'okie dokie'.
+                else:
+                    self.subreddit.flair.set(author, new_flair, flair_class)
+                    msg.reply(MESSAGE_CODES['E02'])
+                    with open(LOG_FILE, 'a') as f:
+                        f.write(f"{time.time()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+                    msg.mark_read()
             else:
-                self.subreddit.flair.set(author, new_flair, flair_class)
-                msg.reply(MESSAGE_CODES['E02'])
+                msg.reply(MESSAGE_CODES["E21"])
                 with open(LOG_FILE, 'a') as f:
-                    f.write(f"{time.time()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
-            msg.mark_read()
-
+                    f.write(f"{time.time()}: Private message from `{author}` denied. Reason: illegal chars.\n")
+                msg.mark_read()
 
 def one():
 

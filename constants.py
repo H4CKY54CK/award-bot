@@ -32,7 +32,7 @@ MESSAGE_CODES = {
     'E15': "You have already `!award`ed this comment.",
     'E16': "You cannot `!award` until your cooldown is over.",
     'E17': "This user is already at the maximum level.",
-    'E21': "I could not assign your flair due to illegal characters in your message.", # No limit apparently.
+    'E21': "I could not assign your flair due to illegal characters in your message. (If it's not on a generic 104 key keyboard, you can't use it.",
     'E22': "You lack the required level to assign yourself a custom flair.",
     'E23': "A multi-line message cannot be assigned as a flair.",
 }
