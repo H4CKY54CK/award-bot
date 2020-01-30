@@ -4,7 +4,8 @@ Here's the quick and dirty instructions.
 
 Your `awardbot.py` will sit somewhere. Obviously. But the first thing it does when ran, is make sure it's working from the directory that it's located in. This is to avoid mishaps in file handling. You'll need a `praw.ini` file in the same directory. If I haven't included a blank one, here's the template.
 
----  
+---
+
 [site1]  
 client_id =  
 client_secret =  
@@ -12,7 +13,8 @@ username =
 password =  
 user_agent =  
 subreddit =  
-  
+
+
 [site2]  
 client_id =  
 client_secret =  
@@ -20,6 +22,7 @@ username =
 password =  
 user_agent =  
 subreddit =  
+
 ---
 
 Legend:
