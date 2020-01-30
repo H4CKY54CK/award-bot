@@ -30,7 +30,7 @@ client_secret: client/app secret from the same place as the ID. You'll have to c
 username: Bot account. Same account in both sites.
 password: Same as above
 user_agent: Something unique and descriptive. Do something like <platform:app_name:subreddit::owner:/u/tehtrb>
-    (so something like `linux:awardbot1:comments:misanthropy::owner:/u/tehtrb` and `linux:awardbot2:inbox/submissions:misanthropy::owner:/u/tehtrb` or something like that)
+so something like `linux:awardbot1:comments:misanthropy::owner:/u/tehtrb` and `linux:awardbot2:inbox/submissions:misanthropy::owner:/u/tehtrb` or something like that)
 subreddit: Misanthropy
 
 Since it's an `.ini` file, you won't need quotes or anything surrounding the fields. It can be `username=myusername` or `username = myusername`, or I think it can even be `username:myusername`, but I know for sure equals signs work, so let's stick with what we know.
