@@ -326,13 +326,13 @@ def one():
 
     # Continuously run this function, which checks submissions for karma and inbox messages for custom flair assignment.
     while True:
-        KarmaCheck('aufb-one').check_subs_and_inbox()
+        KarmaCheck(PLACEHOLDER).check_subs_and_inbox()
 
 def two():
 
     # Continuously run this function, which streams the comments. If the stream breaks, it'll just start it again.
     while True:
-        CommentsStream('aufb-two').collect()
+        CommentsStream(PLACEHOLDER).collect()
 
 def monitor(h1, h2):
 

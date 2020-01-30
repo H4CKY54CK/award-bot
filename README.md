@@ -27,14 +27,21 @@ subreddit =
 
 Legend:
 
-site1 and site2: Arbitrary names that you will use to reference the section they are heading.  
-client_id: client/app ID from `prefs -> apps` (you'll need two apps, one for each site, because we're running two instances of PRAW, but on the same account)  
-client_secret: client/app secret from the same place as the ID. You'll have to click on `Edit` to actually be able to see it.  
-username: Bot account. Same account in both sites.  
-password: Same as above  
-user_agent: Something unique and descriptive. Do something like <platform:app_name:subreddit::owner:/u/tehtrb>  
+**site1 and site2:** Arbitrary names that you will use to reference the section they head. Whatever you name your two sites, enter them where I have place `PLACEHOLDER` (CTRL+F -> 'placeholder').  
+
+**client_id:** client/app ID from `prefs -> apps` (you'll need two apps, one for each site, because we're running two instances of PRAW, but on the same account)  
+
+**client_secret:** client/app secret from the same place as the ID. You'll have to click on `Edit` to actually be able to see it.  
+
+**username:** Bot account. Same account in both sites.  
+
+**password:** Same as above  
+
+**user_agent:** Something unique and descriptive. Do something like <platform:app_name:subreddit::owner:/u/tehtrb>  
 so something like `linux:awardbot1:comments:misanthropy::owner:/u/tehtrb` and `linux:awardbot2:inbox/submissions:misanthropy::owner:/u/tehtrb` or something like that)  
-subreddit: Misanthropy  
+
+**subreddit:** Misanthropy  
+
 
 Since it's an `.ini` file, you won't need quotes or anything surrounding the fields. It can be `username=myusername` or `username = myusername`, or I think it can even be `username:myusername`, but I know for sure equals signs work, so let's stick with what we know.
 
