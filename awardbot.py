@@ -63,6 +63,7 @@ import os
 import re
 import sys
 import praw
+import time
 from datetime import datetime
 from multiprocessing import Process
 from praw.models import Submission, Comment
@@ -93,7 +94,7 @@ class Login:
         if flair == max_lvl:
             comment.reply(message_codes['E17'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
 
         elif flair in flair_values:
             user_level = reverse_flair_levels[flair]
@@ -101,23 +102,23 @@ class Login:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(message_codes['E01'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
             if new_flair == max_lvl:
                 self.reddit.redditor(author).message(invite_subj, invite_msg)
                 with open(log_file, 'a') as f:
-                    f.write(f"{datetime.now()}: Sent invite/invitation to `{author}`. `{rurl}{comment.permalink}`.\n")
+                    f.write(f"{time.time()}: Sent invite/invitation to `{author}`. `{rurl}{comment.permalink}`.\n")
 
         elif flair == None or flair == '':
             new_flair = flair_levels[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(message_codes['E01'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
 
         elif len(flair) > 0:
             comment.reply(message_codes['E17'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
 
 
 class CommentsStream(Login):
@@ -134,6 +135,9 @@ class CommentsStream(Login):
                     if not self.on_cooldown(comment) and self.check_comment(comment):
                         self.process_object(comment)
                     elif self.on_cooldown(comment):
+                        remaining = time.time()-comment.created_utc
+                        readable = datetime.fromtimestamp(remaining)
+                        coolmsg = f"{message_codes['E16']} Remaining: {readable}"
                         comment.reply(message_codes['E16'])
         except Exception as e:
             with open(error_log, 'a') as f:
@@ -151,13 +155,13 @@ class CommentsStream(Login):
         chauthor = str(comment.author)
         msg = f"grep '{chauthor}' {log_file} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
-        last_award = last_award.read().rstrip('\n')
+        last_award = float(last_award.read().rstrip('\n'))
         try:
             if last_award < 0:
                 last_award = 0
         except:
             last_award = 0
-        if comment.created_utc < float(last_award) + cooldown_amount:
+        if comment.created_utc < last_award + cooldown_amount:
             return True
         return False
 
@@ -177,19 +181,19 @@ class CommentsStream(Login):
         if pauthor == author:
             comment.reply(message_codes['E12'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: self award. `{rurl}{comment.permalink}.`\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: self award. `{rurl}{comment.permalink}.`\n")
             return False
 
         if pauthor == thebot:
             comment.reply(message_codes['E14'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: bot award. `{rurl}{comment.permalink}.`\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: bot award. `{rurl}{comment.permalink}.`\n")
             return False
 
         if parent.body == trigger:
             comment.reply(message_codes['E13'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: award award. `{rurl}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: award award. `{rurl}{comment.permalink}`.\n")
             return False
 
         parent.refresh()
@@ -198,7 +202,7 @@ class CommentsStream(Login):
                 if reply.body == trigger and str(reply.author) == author and reply.id != comment.id:
                     comment.reply(message_codes['E15'])
                     with open(log_file, 'a') as f:
-                        f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: already awarded. `{rurl}{comment.permalink}`.\n")
+                        f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: already awarded. `{rurl}{comment.permalink}`.\n")
                     return False
         else:
             return True
@@ -251,7 +255,7 @@ class KarmaCheck(Login):
                     else:
                         msg.reply(message_codes['E22'])
                         with open(log_file, 'a') as f:
-                            f.write(f"{datetime.now()}: Private message from `{author}` denied. Reason: not-top-lvl.\n")
+                            f.write(f"{time.time()}: Private message from `{author}` denied. Reason: not-top-lvl.\n")
                         msg.mark_read()
 
 
@@ -272,14 +276,14 @@ class KarmaCheck(Login):
         if len(content) > 1:
             msg.reply(message_codes['E23'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Private message from `{author}` denied. Reason: multi-line.\n")
+                f.write(f"{time.time()}: Private message from `{author}` denied. Reason: multi-line.\n")
             msg.mark_read()
         elif len(content) == 1:
             new_flair = content[0].rstrip()[:64]
             self.subreddit.flair.set(author, new_flair, flair_class)
             msg.reply(message_codes['E02'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+                f.write(f"{time.time()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
             msg.mark_read()
 
 
