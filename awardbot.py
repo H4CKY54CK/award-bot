@@ -1,32 +1,30 @@
+# Basic/General Info
 
-# Unless otherwise stated, assume all values must be surrounded by quotation. They can be single or double. Doesn't matter.
-#
-# Basic info
-#
-# Keyword. If using a prefix, include it. Or a suffix. Whatever.
-trigger="!award"
-# Flair levels. Once set, you'll encounter issues if you add/subtract/edit entries.
-levels={1: 'Level 1', 2: 'Level 2', 3: 'Level 3', 4: 'Level 4', 5: 'Level 5', 6: 'Max Level'}
-# Karma Threshold. Must be integer. No quotation marks on this one.
-karma_threshold=5
-# Error log file name/path.
-errorlog="error_log.txt"
-# General log file name/path.
-log_file="log.txt"
-# Timeframe for self posts to acquire karma threshold. One of ["all", "hour", "day", "week", "month", "year"]
-timeframe="week"
-# Cooldown, in seconds.
-cooldown=0.0
-# Custom flair invitation subject.
-invite="Invite"
-# Custom flair invitation body.
-invitation="You've been invited. Whatever."
+# Keyword to trigger the bot
+trigger = "!award"
+# Path to error logfile. The first thing the bot does is change directory to it's own current location, so the path can be relative.
+error_log = "error_log.txt"
+# Path to regular logfile. The first thing the bot does is change directory to it's own current location, so the path can be relative.
+log_file = "award_log.txt"
+# How much karma is required for self posts / text posts to trigger a level up.
+karma_limit = 100
+# How far back to look for submissions over the karma limit. One of: "hour", "day", "week", "month", "year", but month and year aren't reliable in your case.
+timeframe = "week"
+# Invitation subject.
+invite_subj = "You're invited!"
+# Invitation message
+invite_msg = "Not anywhere physically, but to a custom flair, rather. Try to maintain your excitement, please."
+# Cooldown between !awards
+cooldown_amount = 24400.0
+
+
 # Replies.
-code = {
+
+message_codes = {
     'E00': "I've encountered an unexpected error.",
     'E01': "Your `!award` has been recorded.",
     'E02': "I've assigned your flair.",
-    'E03': "I've assigned your flair. However, it was longer than Reddit's flair text limit of 64 characters and was cut short.",
+    'E03': "I've assigned your flair. However, it was longer than Reddit's flair text limit of 64 characters and was cut short.", # TODO
     'E11': "Only comments can be `!award`ed, not submissions.",
     'E12': "You cannot `!award` yourself.",
     'E13': "You cannot `!award` other `!award`s.",
@@ -34,10 +32,32 @@ code = {
     'E15': "You have already `!award`ed this comment.",
     'E16': "You cannot `!award` until your cooldown is over.",
     'E17': "This user is already at the maximum level.",
-    'E21': "I could not assign your flair due to illegal characters in your message.",
+    'E21': "I could not assign your flair due to illegal characters in your message.", # TODO
     'E22': "You lack the required level to assign yourself a custom flair.",
     'E23': "A multi-line message cannot be assigned as a flair.",
-    }
+}
+
+# Flair Levels (Dynamically adjustable, although with some side effects and/or a tad bit of assembly required)
+
+flair_levels={
+    1: 'Level 1',
+    2: 'Level 2',
+    3: 'Level 3',
+    4: 'Level 4',
+    5: 'Level 5',
+    6: 'Max Level',
+}
+
+##################
+## DON'T MODIFY ##
+
+rurl = 'https://reddit.com'
+reverse_flair_levels = {a:b for b, a in flair_levels.items()}
+flair_values = flair_levels.values()
+max_lvl = flair_levels[len(flair_levels)]
+
+## DON'T MODIFY ##
+##################
 
 import os
 import re
@@ -60,10 +80,6 @@ class Login:
     def process_object(self, comment):
         """Process this comment, to determine how to level up the parent user."""
 
-        # flairs = {}
-        # for item in self.subreddit.flair(limit=None):
-        #     flairs.update({str(item['user']):item['flair_text']})
-
         # Reload comment, so that we have the most recent info.
         child = comment.author
         comment = self.reddit.comment(comment)
@@ -74,32 +90,35 @@ class Login:
 
         flair_class = ''
 
-        if flair == levels[len(levels)]:
-            comment.reply(code['E17'])
+        if flair == max_level:
+            comment.reply(message_codes['E17'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `https://reddit.com{comment.permalink}`\n")
-        elif flair in levels.values():
-            rlevels = {a:b for b, a in levels.items()}
-            user_level = rlevels[flair]
-            new_flair = levels[user_level+1]
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
+
+        elif flair in flair_values:
+            user_level = reverse_flair_levels[flair]
+            new_flair = flair_levels[user_level+1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            comment.reply(code['E01'])
+            comment.reply(message_codes['E01'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `https://reddit.com{comment.permalink}`.\n")
-            if new_flair == levels[len(levels)]:
-                self.reddit.redditor(author).message(invite, invitation)
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
+            if new_flair == max_lvl:
+                self.reddit.redditor(author).message(invite_subj, invite_msg)
                 with open(log_file, 'a') as f:
-                    f.write(f"{datetime.now()}: Sent invite/invitation to `{author}`. `https://reddit.com{comment.permalink}`.\n")
+                    f.write(f"{datetime.now()}: Sent invite/invitation to `{author}`. `{rurl}{comment.permalink}`.\n")
+
         elif flair == None or flair == '':
-            new_flair = levels[1]
+            new_flair = flair_levels[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            comment.reply(code['E01'])
+            comment.reply(message_codes['E01'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `https://reddit.com{comment.permalink}`.\n")
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{rurl}{comment.permalink}`.\n")
+
         elif len(flair) > 0:
-            comment.reply(code['E17'])
+            comment.reply(message_codes['E17'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `https://reddit.com{comment.permalink}`\n")
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
+
 
 class CommentsStream(Login):
 
@@ -115,17 +134,12 @@ class CommentsStream(Login):
                     if not self.on_cooldown(comment) and self.check_comment(comment):
                         self.process_object(comment)
                     elif self.on_cooldown(comment):
-                        comment.reply(code['E16'])
-        # For debug purposes. Since it'll be a daemon, you won't be able to pause it.
-        except KeyboardInterrupt:
-            sys.exit()
+                        comment.reply(message_codes['E16'])
         except Exception as e:
-            with open(errorlog, 'a') as logf:
+            with open(error_log, 'a') as logf:
                 logf.write(f"{e}\n\n")
                 time.sleep(5)
             self.collect()
-        sys.exit()
-
 
 
     def on_cooldown(self, comment):
@@ -139,7 +153,7 @@ class CommentsStream(Login):
                 last_award = 0
         except:
             last_award = 0
-        if comment.created_utc < float(last_award) + cooldown:
+        if comment.created_utc < float(last_award) + cooldown_amount:
             return True
         return False
 
@@ -153,24 +167,41 @@ class CommentsStream(Login):
         pauthor = str(parent.author)
 
         if isinstance(parent, Submission):
-            comment.reply(code['E11'])
+            comment.reply(message_codes['E11'])
             return False
 
         if pauthor == author:
-            comment.reply(code['E12'])
+            comment.reply(message_codes['E12'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: self award. `https://reddit.com{comment.permalink}.`\n")
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: self award. `{rurl}{comment.permalink}.`\n")
             return False
+
         if pauthor == thebot:
-            comment.reply(code['E14'])
+            comment.reply(message_codes['E14'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: bot award. `https://reddit.com{comment.permalink}.`\n")
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: bot award. `{rurl}{comment.permalink}.`\n")
             return False
+
         if parent.body == trigger:
-            comment.reply(code['E13'])
+            comment.reply(message_codes['E13'])
             with open(log_file, 'a') as f:
-                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: award award. `https://reddit.com{comment.permalink}`.\n")
+                f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: award award. `{rurl}{comment.permalink}`.\n")
             return False
+
+        parent.refresh()
+        if len(parent.replies) > 0:
+            for reply in parent.replies:
+                if reply.body == trigger and str(reply.author) == author and reply.id != comment.id:
+                    comment.reply(message_codes['E15'])
+                    with open(log_file, 'a') as f:
+                        f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: already awarded. `{rurl}{comment.permalink}`.\n")
+                    return False
+        else:
+            return True
+        ####
+        # May possibly need this
+        #
+        #
         # old_id = parent.id
         # parent.refresh()
         # if parent.id != old_id:
@@ -180,16 +211,7 @@ class CommentsStream(Login):
         #     except praw.exceptions.ClientException:
         #         print('SKIPPING due to ClientException:', comment, comment.body)
         #         pass
-
-        if len(parent.replies) > 0:
-            for item in parent.replies:
-                if item.body == trigger and str(item.author) == author and item.id != comment.id:
-                    comment.reply(code['E15'])
-                    with open(log_file, 'a') as f:
-                        f.write(f"{datetime.now()}: Award `{comment.id}` by `{author}` denied. Reason: already awarded. `https://reddit.com{comment.permalink}`.\n")
-                    return False
-        else:
-            return True
+        ####
         return True
 
 
@@ -203,7 +225,7 @@ class KarmaCheck(Login):
         flair_class = '' or None
 
         for submission in self.subreddit.top(timeframe):
-            if submission.score >= karma_threshold and submission.is_self:
+            if submission.score >= karma_limit and submission.is_self:
                 author = str(submission.author)
                 valid_user = re.match(valid, author)
                 if not self.already_replied(submission) and valid_user:
@@ -217,14 +239,13 @@ class KarmaCheck(Login):
                 author = str(msg.author)
                 valid_user = re.match(valid, author)
                 if author in self.flairs and valid_user and not msg.was_comment:
-                    max_lvl = levels[len(levels)]
                     user_flair = self.flairs[author]
-                    if len(user_flair) > 0 and user_flair not in levels.values():
+                    if len(user_flair) > 0 and user_flair not in flair_values:
                         self.process_message(msg)
                     elif user_flair == max_lvl:
                         self.process_message(msg)
                     else:
-                        msg.reply(code['E22'])
+                        msg.reply(message_codes['E22'])
                         with open(log_file, 'a') as f:
                             f.write(f"{datetime.now()}: Private message from `{author}` denied. Reason: not-top-lvl.\n")
                         msg.mark_read()
@@ -245,14 +266,14 @@ class KarmaCheck(Login):
         author = str(msg.author)
         content = msg.body.split('\n')
         if len(content) > 1:
-            msg.reply(code['E23'])
+            msg.reply(message_codes['E23'])
             with open(log_file, 'a') as f:
                 f.write(f"{datetime.now()}: Private message from `{author}` denied. Reason: multi-line.\n")
             msg.mark_read()
         elif len(content) == 1:
             new_flair = content[0].rstrip()[:64]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            msg.reply(code['E02'])
+            msg.reply(message_codes['E02'])
             with open(log_file, 'a') as f:
                 f.write(f"{datetime.now()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
             msg.mark_read()
@@ -265,7 +286,8 @@ def one():
 
 def two():
 
-    CommentsStream('aufb-two').collect()
+    while True:
+        CommentsStream('aufb-two').collect()
 
 def monitor(h1, h2):
 
