@@ -90,7 +90,7 @@ class Login:
 
         flair_class = ''
 
-        if flair == max_level:
+        if flair == max_lvl:
             comment.reply(message_codes['E17'])
             with open(log_file, 'a') as f:
                 f.write(f"{datetime.now()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{rurl}{comment.permalink}`\n")
