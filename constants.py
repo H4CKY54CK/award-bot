@@ -24,7 +24,7 @@ MESSAGE_CODES = {
     'E00': "I've encountered an unexpected error.",
     'E01': "Your `!award` has been recorded.",
     'E02': "I've assigned your flair.",
-    'E03': "I've assigned your flair. However, it was longer than Reddit's flair text limit of 64 characters and was cut short.", # TODO
+    'E03': "I've assigned your flair. However, it was longer than Reddit's flair text limit of 64 characters and was cut short.",
     'E11': "Only comments can be `!award`ed, not submissions.",
     'E12': "You cannot `!award` yourself.",
     'E13': "You cannot `!award` other `!award`s.",
@@ -32,7 +32,7 @@ MESSAGE_CODES = {
     'E15': "You have already `!award`ed this comment.",
     'E16': "You cannot `!award` until your cooldown is over.",
     'E17': "This user is already at the maximum level.",
-    'E21': "I could not assign your flair due to illegal characters in your message.", # TODO
+    'E21': "I could not assign your flair due to illegal characters in your message.", # No limit apparently.
     'E22': "You lack the required level to assign yourself a custom flair.",
     'E23': "A multi-line message cannot be assigned as a flair.",
 }
