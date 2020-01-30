@@ -136,13 +136,17 @@ class CommentsStream(Login):
                     elif self.on_cooldown(comment):
                         comment.reply(message_codes['E16'])
         except Exception as e:
-            with open(error_log, 'a') as logf:
-                logf.write(f"{e}\n\n")
+            with open(error_log, 'a') as f:
+                f.write(f"{e}\n\n")
                 time.sleep(5)
             self.collect()
 
 
     def on_cooldown(self, comment):
+
+        if not os.path.exists(log_file):
+            with open(log_file, 'a') as f:
+                pass
 
         chauthor = str(comment.author)
         msg = f"grep '{chauthor}' {log_file} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
