@@ -12,7 +12,7 @@ username =
 password =  
 user_agent =  
 subreddit =  
-
+  
 [site2]  
 client_id =  
 client_secret =  
