@@ -126,8 +126,6 @@ class CommentsStream(Login):
         msg = f"grep '{chauthor}' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
         last_award = last_award.read().rstrip('\n')
-        with open(LOG_FILE, 'a') as f:
-            f.write(f"Value: {last_award} | Type: {type(last_award)}")
         try:
             if float(last_award) < 0:
                 last_award = 0
