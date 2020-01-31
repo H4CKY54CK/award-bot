@@ -125,11 +125,11 @@ class CommentsStream(Login):
         chauthor = str(comment.author)
         msg = f"grep '{chauthor}' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
-        last_award = float(last_award.read().rstrip('\n'))
-        with open('test.txt', 'w') as f:
-            f.write(last_award)
+        last_award = last_award.read().rstrip('\n')
+        with open(LOG_FILE, 'a') as f:
+            f.write(f"Value: {last_award} | Type: {type(last_award)}")
         try:
-            if last_award < 0:
+            if float(last_award) < 0:
                 last_award = 0
         except:
             last_award = 0
@@ -318,13 +318,13 @@ def one():
 
     # Continuously run this function, which checks submissions for karma and inbox messages for custom flair assignment.
     while True:
-        KarmaCheck('privmsgs').check_subs_and_inbox()
+        KarmaCheck(KC).check_subs_and_inbox()
 
 def two():
 
     # Continuously run this function, which streams the comments. If the stream breaks, it'll just start it again.
     while True:
-        CommentsStream('commentstream').collect()
+        CommentsStream(CT).collect()
 
 def monitor(h1, h2):
 

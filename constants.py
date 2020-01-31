@@ -1,5 +1,8 @@
 # Basic/General Info
 
+KC = ""
+CT = ""
+
 # Keyword to trigger the bot
 TRIGGER = "!award"
 # Path to error logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
