@@ -14,8 +14,10 @@ TIMEFRAME = "week"
 INVITE_SUBJ = "You're invited!"
 # Invitation message
 INVITE_MSG = "Not anywhere physically, but to a custom flair, rather. Try to maintain your excitement, please."
-# Cooldown between !awards
+# Cooldown between !awards, in seconds, as a float. (Some common ones: 8h = 28800, 24h = 86400, 2d = 172800, 3d = 259200, 5d = 432000)
 COOLDOWN_AMOUNT = 28800.0
+# Also, I don't think this will be relevant in any way, but there is about a 5 minute difference between reddit's time server and 
+
 
 
 # Replies. (I need to verify the illegal characters thing, if there even are any, and I'll quick-edit the other one in soon.)
