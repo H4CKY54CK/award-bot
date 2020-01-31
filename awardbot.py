@@ -131,7 +131,7 @@ class CommentsStream(Login):
                 last_award = 0
         except:
             last_award = 0
-        if comment.created_utc < last_award + COOLDOWN_AMOUNT:
+        if comment.created_utc < float(last_award) + COOLDOWN_AMOUNT:
             return True
         return False
 
