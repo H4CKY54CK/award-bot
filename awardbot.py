@@ -125,13 +125,15 @@ class CommentsStream(Login):
         chauthor = str(comment.author)
         msg = f"grep '{chauthor}' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
-        last_award = last_award.read().rstrip('\n')
+        last_award = float(last_award.read().rstrip('\n'))
+        with open('test.txt', 'w') as f:
+            f.write(last_award)
         try:
-            if float(last_award) < 0:
+            if last_award < 0:
                 last_award = 0
         except:
             last_award = 0
-        if comment.created_utc < float(last_award) + COOLDOWN_AMOUNT:
+        if comment.created_utc < last_award + COOLDOWN_AMOUNT:
             return True
         return False
 
