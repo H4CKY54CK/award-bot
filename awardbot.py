@@ -119,7 +119,7 @@ class CommentsStream(Login):
                 pass
 
         chauthor = str(comment.author)
-        msg = f"grep '{chauthor}' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
+        msg = f"grep '{chauthor} increased' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
         last_award = last_award.read().rstrip('\n')
         try:
@@ -128,7 +128,7 @@ class CommentsStream(Login):
         except:
             last_award = 0
         if comment.created_utc < float(last_award) + COOLDOWN_AMOUNT:
-            rem = (COOLDOWN_AMOUNT - (time.time() - comment.created_utc))
+            rem = (float(last_award) + COOLDOWN_AMOUNT) - time.time()
             readable = convert(rem)
             coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
             comment.reply(coolmsg)
