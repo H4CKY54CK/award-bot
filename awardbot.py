@@ -100,14 +100,7 @@ class CommentsStream(Login):
                         if self.check_comment(comment):
                             # Send for processing.
                             self.process_object(comment)
-                    # Since it returned True, do this.
-                    else:
-                        remaining = time.time()-comment.created_utc
-                        readable = convert(remaining)
-                        coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
-                        comment.reply(coolmsg)
-                        with open(LOG_FILE, 'a') as f:
-                            f.write(f"{time.time()}: Award {comment.id} by {str(comment.author)} denied. Reason: on cooldown. {URL}{comment.permalink}.\n")
+
 
         # If something happens and we get an error, send itself right back the start of this function.
         except:
@@ -135,6 +128,12 @@ class CommentsStream(Login):
         except:
             last_award = 0
         if comment.created_utc < float(last_award) + COOLDOWN_AMOUNT:
+            rem = (COOLDOWN_AMOUNT - (time.time() - comment.created_utc))
+            readable = convert(rem)
+            coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
+            comment.reply(coolmsg)
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{time.time()}: Award {comment.id} by {str(comment.author)} denied. Reason: on cooldown. {URL}{comment.permalink}.\n")
             return True
         return False
 
