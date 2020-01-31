@@ -298,8 +298,9 @@ class KarmaCheck(Login):
 
                 # If their flair is longer than the limit, assign it, but tell them about it.
                 if len(msg.body) > 64:
+                    old_flair = self.flairs[author]
                     self.subreddit.flair.set(author, new_flair, flair_class)
-                    msg.reply(MESSAGE_CODES['E03'])
+                    msg.reply(f"{MESSAGE_CODES['E03']}  \nOld: {old_flair}  \nNew: {new_flair}")
                     with open(LOG_FILE, 'a') as f:
                         f.write(f"{time.time()}: Private message from {author} processed (however, their flair got shortened due to the length of their message). Flair changed from {self.flairs[author]} to {new_flair}.\n")
                     msg.mark_read()
