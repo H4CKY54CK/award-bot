@@ -103,7 +103,7 @@ class CommentsStream(Login):
                     # Since it returned True, do this.
                     else:
                         remaining = time.time()-comment.created_utc
-                        readable = datetime.fromtimestamp(remaining)
+                        readable = convert(remaining)
                         coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
                         comment.reply(coolmsg)
                         with open(LOG_FILE, 'a') as f:
@@ -306,10 +306,11 @@ class KarmaCheck(Login):
 
                 # If it's not longer than the limit, assign it, respond with an 'okie dokie'.
                 else:
+                    old_flair = self.flairs[author]
                     self.subreddit.flair.set(author, new_flair, flair_class)
-                    msg.reply(MESSAGE_CODES['E02'])
+                    msg.reply(f"{MESSAGE_CODES['E02']}  \nOld: {old_flair}  \nNew: {new_flair}")
                     with open(LOG_FILE, 'a') as f:
-                        f.write(f"{time.time()}: Private message from {author} processed. Flair changed from {self.flairs[author]} to {new_flair}.\n")
+                        f.write(f"{time.time()}: Private message from {author} processed. Flair changed from {old_flair} to {new_flair}.\n")
                     msg.mark_read()
             else:
                 msg.reply(MESSAGE_CODES["E21"])
@@ -359,6 +360,17 @@ def main():
         monitor(h1, h2)
     except:
         monitor(h1, h2)
+
+def convert(seconds):
+    seconds = round(seconds)
+    seconds = seconds % (24*3600)
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return f"{hour}:{minutes:02d}:{seconds:02d}"
+
+
 
 if __name__ == '__main__':
     # Move to a known directory.
