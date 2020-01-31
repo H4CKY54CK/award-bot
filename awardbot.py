@@ -125,13 +125,13 @@ class CommentsStream(Login):
         chauthor = str(comment.author)
         msg = f"grep '{chauthor}' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
-        last_award = float(last_award.read().rstrip('\n'))
+        last_award = last_award.read().rstrip('\n')
         try:
-            if last_award < 0:
+            if float(last_award) < 0:
                 last_award = 0
         except:
             last_award = 0
-        if comment.created_utc < last_award + COOLDOWN_AMOUNT:
+        if comment.created_utc < float(last_award) + COOLDOWN_AMOUNT:
             return True
         return False
 
@@ -316,19 +316,20 @@ def one():
 
     # Continuously run this function, which checks submissions for karma and inbox messages for custom flair assignment.
     while True:
-        KarmaCheck(PLACEHOLDER).check_subs_and_inbox()
+        KarmaCheck('privmsgs').check_subs_and_inbox()
 
 def two():
 
     # Continuously run this function, which streams the comments. If the stream breaks, it'll just start it again.
     while True:
-        CommentsStream(PLACEHOLDER).collect()
+        CommentsStream('commentstream').collect()
 
 def monitor(h1, h2):
 
     # Continuously check the children, and if anything stops them, spawn up a new one. Set daemon to True, so
     # that they can't make their own children, just as a safety measure. Parents also try to terminate their daemonic processes, but not well enough
     while True:
+        time.sleep(.1)
         if not h1.is_alive():
             h1 = Process(target=one)
             h1.daemon = True
