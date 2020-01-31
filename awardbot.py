@@ -119,7 +119,7 @@ class CommentsStream(Login):
                 pass
 
         chauthor = str(comment.author)
-        msg = f"grep '{chauthor} increased' {LOG_FILE} | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
+        msg = f"grep 'by {chauthor}' {LOG_FILE} | grep 'Award' | grep 'successfully processed' | tail -1 | cut -d '.' -f1"
         last_award = os.popen(msg)
         last_award = last_award.read().rstrip('\n')
         try:
