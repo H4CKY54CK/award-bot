@@ -38,7 +38,7 @@ class Login:
         if flair == MAX_LEVEL:
             comment.reply(MESSAGE_CODES['E17'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{URL}{comment.permalink}`\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}\n")
 
         # Since the flair isn't maxed out, is it even one of the levels?
         elif flair in FLAIR_VALUES:
@@ -52,13 +52,13 @@ class Login:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(MESSAGE_CODES['E01'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{URL}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
 
             # If the user advanced to the max level, they get the invite.
             if new_flair == MAX_LEVEL:
                 self.reddit.redditor(author).message(INVITE_SUBJ, INVITE_MSG)
                 with open(LOG_FILE, 'a') as f:
-                    f.write(f"{time.time()}: Sent invite/invitation to `{author}`. `{URL}{comment.permalink}`.\n")
+                    f.write(f"{time.time()}: Sent invite/invitation to {author}. {URL}{comment.permalink}.\n")
 
         # If the flair isn't at max level, and isn't even one of the levels, it could be that they have a custom flair, or they may not have one at all.
         # Checking if it's None or an empty string is easy, let's do that first. (I've seen both get returned from the data, so check for both)
@@ -67,13 +67,13 @@ class Login:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(MESSAGE_CODES['E01'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` successfully processed. `{author}` increased to `{new_flair}`. `{URL}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
 
         # If it's not max, and not one of the levels, and they definitely have one, then logic says they must have a custom flair.
         elif len(flair) > 0:
             comment.reply(MESSAGE_CODES['E17'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{chauthor}` unprocessed. Reason: already-top-level. `{URL}{comment.permalink}`\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}\n")
 
 
 class CommentsStream(Login):
@@ -106,9 +106,12 @@ class CommentsStream(Login):
                         readable = datetime.fromtimestamp(remaining)
                         coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
                         comment.reply(coolmsg)
+                        with open(LOG_FILE, 'a') as f:
+                            f.write(f"{time.time()}: Award {comment.id} by {str(comment.author)} denied. Reason: on cooldown. {URL}{comment.permalink}.\n")
 
         # If something happens and we get an error, send itself right back the start of this function.
-        except Exception as e:
+        except:
+            e = sys.exc_info()[0]
             with open(ERROR_LOG, 'a') as f:
                 f.write(f"{e}\n\n")
                 time.sleep(5)
@@ -147,27 +150,29 @@ class CommentsStream(Login):
         # If the parent is a submission, Fail
         if isinstance(parent, Submission):
             comment.reply(MESSAGE_CODES['E11'])
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: post award. {URL}{comment.permalink}.\n")
             return False
 
         # If they are doing this to their own comment, Fail
         if pauthor == author:
             comment.reply(MESSAGE_CODES['E12'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: self award. `{URL}{comment.permalink}.`\n")
+                f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: self award. {URL}{comment.permalink}.\n")
             return False
 
         # If the parent comment is the bot, Fail
         if pauthor == thebot:
             comment.reply(MESSAGE_CODES['E14'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: bot award. `{URL}{comment.permalink}.`\n")
+                f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: bot award. {URL}{comment.permalink}.\n")
             return False
 
         # If the parent comment is also an !award, Fail
         if parent.body == TRIGGER:
             comment.reply(MESSAGE_CODES['E13'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: award award. `{URL}{comment.permalink}`.\n")
+                f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: award award. {URL}{comment.permalink}.\n")
             return False
 
         # Refresh to get replies, check replies to see if they've already awarded the parent comment before. If they have, Fail
@@ -178,7 +183,7 @@ class CommentsStream(Login):
                 if reply.body == TRIGGER and str(reply.author) == author and reply.id != comment.id:
                     comment.reply(MESSAGE_CODES['E15'])
                     with open(LOG_FILE, 'a') as f:
-                        f.write(f"{time.time()}: Award `{comment.id}` by `{author}` denied. Reason: already awarded. `{URL}{comment.permalink}`.\n")
+                        f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: already awarded. {URL}{comment.permalink}.\n")
                     return False
 
         ####
@@ -251,7 +256,7 @@ class KarmaCheck(Login):
                     else:
                         msg.reply(MESSAGE_CODES['E22'])
                         with open(LOG_FILE, 'a') as f:
-                            f.write(f"{time.time()}: Private message from `{author}` denied. Reason: not-top-lvl.\n")
+                            f.write(f"{time.time()}: Private message from {author} denied. Reason: not-top-lvl.\n")
                         msg.mark_read()
 
 
@@ -282,7 +287,7 @@ class KarmaCheck(Login):
         if len(content) > 1:
             msg.reply(MESSAGE_CODES['E23'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Private message from `{author}` denied. Reason: multi-line.\n")
+                f.write(f"{time.time()}: Private message from {author} denied. Reason: multi-line.\n")
             msg.mark_read()
 
         # If there's only one item in list, it's fine. Assign it. Respond, mark read.
@@ -296,7 +301,7 @@ class KarmaCheck(Login):
                     self.subreddit.flair.set(author, new_flair, flair_class)
                     msg.reply(MESSAGE_CODES['E03'])
                     with open(LOG_FILE, 'a') as f:
-                        f.write(f"{time.time()}: Private message from `{author}` processed (however, their flair got shortened due to the length of their message). Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+                        f.write(f"{time.time()}: Private message from {author} processed (however, their flair got shortened due to the length of their message). Flair changed from {self.flairs[author]} to {new_flair}.\n")
                     msg.mark_read()
 
                 # If it's not longer than the limit, assign it, respond with an 'okie dokie'.
@@ -304,12 +309,12 @@ class KarmaCheck(Login):
                     self.subreddit.flair.set(author, new_flair, flair_class)
                     msg.reply(MESSAGE_CODES['E02'])
                     with open(LOG_FILE, 'a') as f:
-                        f.write(f"{time.time()}: Private message from `{author}` processed. Flair changed from `{self.flairs[author]}` to `{new_flair}`.\n")
+                        f.write(f"{time.time()}: Private message from {author} processed. Flair changed from {self.flairs[author]} to {new_flair}.\n")
                     msg.mark_read()
             else:
                 msg.reply(MESSAGE_CODES["E21"])
                 with open(LOG_FILE, 'a') as f:
-                    f.write(f"{time.time()}: Private message from `{author}` denied. Reason: illegal chars.\n")
+                    f.write(f"{time.time()}: Private message from {author} denied. Reason: illegal chars.\n")
                 msg.mark_read()
 
 def one():
