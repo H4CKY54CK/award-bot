@@ -3,7 +3,8 @@ import re
 import sys
 import praw
 import time
-from constants import *
+# Rename your constants.py to config.py
+from config import *
 from multiprocessing import Process
 from praw.models import Submission
 
