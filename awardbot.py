@@ -3,11 +3,9 @@ import re
 import sys
 import praw
 import time
-from string import printable
 from constants import *
-from datetime import datetime
 from multiprocessing import Process
-from praw.models import Submission, Comment
+from praw.models import Submission
 
 
 class Login:
@@ -19,10 +17,55 @@ class Login:
         self.subreddit = self.reddit.subreddit(self.reddit.config.custom['subreddit'])
 
 
-    def process_object(self, comment):
+    def unprocessed(self, submission):
+
+        msg = f"grep -q 'Submission {submission.id} by {str(submission.author)} successfully processed' {LOG_FILE}; echo $?"
+        entry = os.popen(msg).read().strip('\n')
+
+        if entry == '0':
+            return False
+        elif entry == '1':
+            return True
+        else:
+            with open('error_log.txt', 'a') as f:
+                f.write("There's a problem in the submission grep check.")
+            return False
+
+        
+    def process_submission(self, submission):
         """Process this comment, to determine how to level up the parent user."""
 
-        child = comment.author
+        submission = self.reddit.submission(submission)
+        author = str(submission.author)
+        flair = submission.author_flair_text
+
+        flair_class = ''
+
+
+        # entry = last_award.read().rstrip('\n')
+
+        if flair == MAX_LEVEL:
+            pass
+        elif flair in FLAIR_VALUES:
+            user_level = REVERSE_FLAIRS[flair]
+            new_flair = FLAIR_LEVELS[user_level+1]
+            self.subreddit.flair.set(author, new_flair, flair_class)
+            submission.reply(MESSAGE_CODES['E31'])
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{time.time()}: Submission {submission.id} by {author} successfully processed. {author} increased to {new_flair}. {URL}{submission.permalink}.\n")
+        elif flair == None or flair == '':
+            new_flair = FLAIR_LEVELS[1]
+            self.subreddit.flair.set(author, new_flair, flair_class)
+            submission.reply(MESSAGE_CODES['E31'])
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{time.time()}: Submission {submission.id} by {author} successfully processed. {author} increased to {new_flair}. {URL}{submission.permalink}.\n")
+        elif len(flair) > 0:
+            pass
+
+
+    def process_comment(self, comment):
+        """Process this comment, to determine how to level up the parent user."""
+
         # Reload comment by reinstantiating it, so that we have the most recent info.
         comment = self.reddit.comment(comment)
         # Instantiate an instance of the parent comment, so we can treat it like any other comment.
@@ -38,7 +81,7 @@ class Login:
         if flair == MAX_LEVEL:
             comment.reply(MESSAGE_CODES['E17'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}.\n")
 
         # Since the flair isn't maxed out, is it even one of the levels?
         elif flair in FLAIR_VALUES:
@@ -73,7 +116,7 @@ class Login:
         elif len(flair) > 0:
             comment.reply(MESSAGE_CODES['E17'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} unprocessed. Reason: already-top-level. {URL}{comment.permalink}.\n")
 
 
 class CommentsStream(Login):
@@ -99,7 +142,7 @@ class CommentsStream(Login):
                         # Test against the conditions, must return True to pass.
                         if self.check_comment(comment):
                             # Send for processing.
-                            self.process_object(comment)
+                            self.process_comment(comment)
 
 
         # If something happens and we get an error, send itself right back the start of this function.
@@ -213,21 +256,25 @@ class KarmaCheck(Login):
         # Create a global dictionary that we don't have to pass around.
         self.flairs = {}
         valid = r'[a-zA-Z0-9_-]+'
-        flair_class = '' or None
 
         # Check submissions, sorted by highest karma first, in the last `TIMEFRAME` (probably 'week')
-        for submission in self.subreddit.top(TIMEFRAME):
+        for submission in self.subreddit.new(limit=None):
 
-            # If the score meets the requirements, and is a self post...
-            if submission.score >= KARMA_LIMIT and submission.is_self:
-                author = str(submission.author)
-                valid_user = re.match(valid, author)
+            if submission.created_utc > (time.time() - 604800):
 
-                # and if we haven't replied to this submission before, and if the username is valid...
-                if not self.already_replied(submission) and valid_user:
+                # If the score meets the requirements, and is a self post...
+                if submission.score >= KARMA_LIMIT and submission.is_self:
+                    author = str(submission.author)
+                    valid_user = re.match(valid, author)
 
-                    # Process it
-                    self.process_object(submission)
+                    # and if we haven't replied to this submission before, and if the username is valid...
+                    if self.unprocessed(submission) and valid_user:
+
+                        # Process it
+                        self.process_submission(submission)
+
+            else:
+                continue
 
         # If a user has a flair in the subreddit, add the user and their flair to the dict
         for item in self.subreddit.flair(limit=None):
@@ -257,17 +304,6 @@ class KarmaCheck(Login):
                         with open(LOG_FILE, 'a') as f:
                             f.write(f"{time.time()}: Private message from {author} denied. Reason: not-top-lvl.\n")
                         msg.mark_read()
-
-
-
-    def already_replied(self, submission):
-        """Whether we've replied to the submission once before or not."""
-
-
-        for comment in submission.comments:
-            if comment.author == self.reddit.user.me():
-                return True
-        return False
 
 
     def process_message(self, msg):
@@ -337,22 +373,18 @@ def monitor(h1, h2):
     while True:
         time.sleep(.1)
         if not h1.is_alive():
-            h1 = Process(target=one)
-            h1.daemon = True
+            h1 = Process(target=one, daemon=True)
             h1.start()
         if not h2.is_alive():
-            h2 = Process(target=two)
-            h2.daemon = True
+            h2 = Process(target=two, daemon=True)
             h2.start()
 
 def main():
 
     # Setup for multiprocessing. No arguments, since we know what we want to do already.
-    h1 = Process(target=one)
-    h1.daemon = True
+    h1 = Process(target=one, daemon=True)
     h1.start()
-    h2 = Process(target=two)
-    h2.daemon = True
+    h2 = Process(target=two, daemon=True)
     h2.start()
 
     # Without this little function, as small as it is, it would be double the size right here. (the function `monitor` I mean, not the whole thing o_o)
@@ -369,8 +401,6 @@ def convert(seconds):
     minutes = seconds // 60
     seconds %= 60
     return f"{hour}:{minutes:02d}:{seconds:02d}"
-
-
 
 if __name__ == '__main__':
     # Move to a known directory.

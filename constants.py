@@ -1,7 +1,7 @@
 # Basic/General Info
 
-KC = ""
-CT = ""
+KC = "aufb-one"
+CT = "aufb-two"
 
 # Keyword to trigger the bot
 TRIGGER = "!award"
@@ -10,7 +10,7 @@ ERROR_LOG = "/home/hacky/error_log.txt"
 # Path to regular logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
 LOG_FILE = "/home/hacky/award_log.txt"
 # How much karma is required for self posts / text posts to trigger a level up.
-KARMA_LIMIT = 100
+KARMA_LIMIT = 2
 # How far back to look for submissions over the karma limit. One of: "hour", "day", "week", "month", "year", but month and year aren't reliable in your case.
 TIMEFRAME = "week"
 # Invitation subject.
@@ -40,6 +40,7 @@ MESSAGE_CODES = {
     'E21': "I could not assign your flair due to illegal characters in your message. (If it's not on a generic 104 key keyboard, you can't use it.",
     'E22': "You lack the required level to assign yourself a custom flair.",
     'E23': "A multi-line message cannot be assigned as a flair.",
+    'E31': "Congratulations! You've acquired enough karma on this submission to earn yourself a levelup!"
 }
 
 # Flair Levels (Dynamically adjustable, although with some side effects and/or a tad bit of assembly required)
