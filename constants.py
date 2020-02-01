@@ -1,18 +1,16 @@
 # Basic/General Info
 
-KC = "aufb-one"
-CT = "aufb-two"
+KC = ""
+CT = ""
 
 # Keyword to trigger the bot
 TRIGGER = "!award"
 # Path to error logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
-ERROR_LOG = "/home/hacky/error_log.txt"
+ERROR_LOG = "/home/reddit/error_log.txt"
 # Path to regular logfile. The first thing the bot does is change directory to where it's located, although an absolute path is still required.
-LOG_FILE = "/home/hacky/award_log.txt"
+LOG_FILE = "/home/reddit/award_log.txt"
 # How much karma is required for self posts / text posts to trigger a level up.
-KARMA_LIMIT = 2
-# How far back to look for submissions over the karma limit. One of: "hour", "day", "week", "month", "year", but month and year aren't reliable in your case.
-TIMEFRAME = "week"
+KARMA_LIMIT = 100
 # Invitation subject.
 INVITE_SUBJ = "You're invited!"
 # Invitation message
