@@ -2,6 +2,7 @@
 
 KC = ""
 CT = ""
+CR = ""
 
 # Keyword to trigger the bot
 TRIGGER = "!award"
