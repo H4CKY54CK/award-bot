@@ -68,7 +68,7 @@ class ModBot:
 
         if args.comments:
             for item in com:
-                if item is None:
+                if item is None or item.removed:
                     continue
                 if str(item.author).lower() in users:
                     comments[str(item.author)].append(item)
