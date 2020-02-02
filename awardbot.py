@@ -19,31 +19,30 @@ class Login:
 
 
     def unprocessed(self, submission):
+        """Check this submission to see if it's in the log or not."""
+
+        if not os.path.exists(LOG_FILE):
+            with open(LOG_FILE, 'a') as f:
+                pass
 
         msg = f"grep -q 'Submission {submission.id} by {str(submission.author)} successfully processed' {LOG_FILE}; echo $?"
         entry = os.popen(msg).read().strip('\n')
 
-        if entry == '0':
-            return False
-        elif entry == '1':
+        # If the grep returns `1`, it didn't find a match. Return `True` (unprocessed)
+        if entry == '1':
             return True
-        else:
-            with open('error_log.txt', 'a') as f:
-                f.write("There's a problem in the submission grep check.")
-            return False
 
-        
+        # Anything else, return False (not unprocessed)
+        return False
+
+
     def process_submission(self, submission):
         """Process this comment, to determine how to level up the parent user."""
 
         submission = self.reddit.submission(submission)
         author = str(submission.author)
         flair = submission.author_flair_text
-
         flair_class = ''
-
-
-        # entry = last_award.read().rstrip('\n')
 
         if flair == MAX_LEVEL:
             pass
@@ -145,8 +144,7 @@ class CommentsStream(Login):
                             # Send for processing.
                             self.process_comment(comment)
 
-
-        # If something happens and we get an error, send itself right back the start of this function.
+        # If something happens and we get an error, send itself right back the start of this function, and log the error.
         except:
             e = sys.exc_info()[0]
             with open(ERROR_LOG, 'a') as f:
@@ -156,7 +154,7 @@ class CommentsStream(Login):
 
 
     def on_cooldown(self, comment):
-        """Your doing."""
+        """When did this one get so lengthy?"""
 
         if not os.path.exists(LOG_FILE):
             with open(LOG_FILE, 'a') as f:
@@ -249,6 +247,7 @@ class CommentsStream(Login):
 
 
 class KarmaCheck(Login):
+    """Subclass of Login, inherits Login's methods."""
 
 
     def check_subs_and_inbox(self):
@@ -258,10 +257,10 @@ class KarmaCheck(Login):
         self.flairs = {}
         valid = r'[a-zA-Z0-9_-]+'
 
-        # Check submissions, sorted by highest karma first, in the last `TIMEFRAME` (probably 'week')
+        # Check submissions, sorted newest first.
         for submission in self.subreddit.new(limit=None):
 
-            if submission.created_utc > (time.time() - 604800):
+            if submission.created_utc > (time.time() - TIMEFRAME):
 
                 # If the score meets the requirements, and is a self post...
                 if submission.score >= KARMA_LIMIT and submission.is_self:
