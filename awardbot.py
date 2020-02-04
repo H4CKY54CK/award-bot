@@ -222,6 +222,9 @@ class CommentsStream(Login):
         msg = f"grep -q 'by {author} on {parent.id} successfully processed' {LOG_FILE}; echo $?"
         entry = os.popen(msg).read().strip('\n')
         if entry == '0':
+            comment.reply(MESSAGE_CODES['E15'])
+            with open(LOG_FILE, 'a') as f:
+                f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: already awarded. {URL}{comment.permalink}.\n")
             return False
 
         ####
