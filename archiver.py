@@ -5,9 +5,9 @@ import sys
 import praw
 import time
 import argparse
+from archiverconfig import *
 from collections import defaultdict
 from praw.models import Comment, Submission
-# from config import *
 
 class NameList(object):
     def __init__(self, names):
@@ -28,8 +28,16 @@ class ModBot:
 
     def archive(self, args=None):
 
+        if os.path.exists(include):
+            with open(include) as f:
+                extras = f.read()
+            extras = extras.split('\n')
+
         users = NameList(args.user)
 
+        for i in extras:
+            users.append(i)
+            
         conversations = self.subreddit.modmail.conversations()
         for conv in conversations:
             authors = []
@@ -44,10 +52,11 @@ class ModBot:
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
-    bot = ModBot('hacky')
+    bot = ModBot(AR)
     parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify comments/submission (can take multiple users)")
     parser.set_defaults(func=bot.archive)
     args = parser.parse_args(argv)
+
     args.func(args)
 
 if __name__ == '__main__':

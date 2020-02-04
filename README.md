@@ -2,7 +2,7 @@
 
 ## NEWS/ANNOUNCEMENTS
 
- I've relocated the config file, `constants.py`, to a subfolder, `config`. This way, I can freely modify the template without resetting yours, and I'll feel better not leaving a broken import in the script with a comment above it instructing on what to do. The import will be `from constants import *` from now on, but there won't be a `constants.py` in the root directory anymore. I like this better, but in order for the bot to work, the config needs to be filled out and moved up one directory. It will say that here, a bit further down, and in the config itself.
+ Rename your `constants.py` to `config.py`, or don't, I don't care. Either way, it will pick it up. This just makes it more convenient for me.
 
 ## Description
 
@@ -15,3 +15,4 @@
  Award-Bot
  CommentRemover (on the command line, `submod -h`)
  ModMailArchiver (you'll need to run this one like a script with `python archiver.py file`, the file being a .txt file with a list of user names)
+    -Rest of this feature coming soon
