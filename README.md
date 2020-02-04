@@ -1,52 +1,17 @@
-####AwardBot
+#Award-Bot
 
-Here's the quick and dirty instructions.
+## NEWS/ANNOUNCEMENTS
 
-Your `awardbot.py` will sit somewhere. Obviously. But the first thing it does when ran, is make sure it's working from the directory that it's located in. This is to avoid mishaps in file handling. You'll need a `praw.ini` file in the same directory. If I haven't included a blank one, here's the template.
+ I've relocated the config file, `constants.py`, to a subfolder, `config`. This way, I can freely modify the template without resetting yours, and I'll feel better not leaving a broken import in the script with a comment above it instructing on what to do. The import will be `from constants import *` from now on, but there won't be a `constants.py` in the root directory anymore. I like this better, but in order for the bot to work, the config needs to be filled out and moved up one directory. It will say that here, a bit further down, and in the config itself.
 
----
+## Description
 
-[site1]  
-client_id =  
-client_secret =  
-username =  
-password =  
-user_agent =  
-subreddit =  
+ A bot for handling a custom award system for a subreddit. When ran, spawns two children. Child 1 monitors a subreddit's comments, live, and levels users up based on `!awards` they get from other users in reply. Child 2 does two things: 1) parses messages from users who are at the highest level and assigns them custom flair (once you reach top level, you can change your flair as often as you wish). 2) check the subreddit for submissions with 100 karma or more, and awards them a level up, same as an `!award` would do.
 
+ This *does* mean it's using the multiprocessing module. However, don't be alarmed. The parent has only one job: Restart the children if/when they die. There's no fancy loop, or queue, or pool... Just a while loop that checks on the state of the two childrenwith a short nap on every iteration. Raising children is tough.
 
-[site2]  
-client_id =  
-client_secret =  
-username =  
-password =  
-user_agent =  
-subreddit =  
+###### Contents
 
----
-
-Legend:
-
-**site1 and site2:** Arbitrary names that you will use to reference the section they head. Whatever you name your two sites, enter them where I have place `PLACEHOLDER` (CTRL+F -> 'placeholder').  
-
-**client_id:** client/app ID from `prefs -> apps` (you'll need two apps, one for each site, because we're running two instances of PRAW, but on the same account)  
-
-**client_secret:** client/app secret from the same place as the ID. You'll have to click on `Edit` to actually be able to see it.  
-
-**username:** Bot account. Same account in both sites.  
-
-**password:** Same as above  
-
-**user_agent:** Something unique and descriptive. Do something like <platform:app_name:subreddit::owner:/u/tehtrb>  
-so something like `linux:awardbot1:comments:misanthropy::owner:/u/tehtrb` and `linux:awardbot2:inbox/submissions:misanthropy::owner:/u/tehtrb` or something like that)  
-
-**subreddit:** Misanthropy  
-
-
-Since it's an `.ini` file, you won't need quotes or anything surrounding the fields. It can be `username=myusername` or `username = myusername`, or I think it can even be `username:myusername`, but I know for sure equals signs work, so let's stick with what we know.
-
-Take `site1` and `site2` and stick them where I left `PLACEHOLDER`s. It should look like `CommentsStream('sitenumberone').collect()` and `KarmaCheck('sitenumbertwo').check_subs_and_inbox()`. It doesn't matter which one, but only input the string, and don't move anything around. Everything should just work without any meddling.
-
-To start the bot, you could call `python3 awardbot.py &` or install it as a service, as I'm sure you'll do. Keep an eye on their process IDs, in case they change. It should write to the `error_log.txt` if that happens anyway. so as long as you check occasionally for one or the other, that's good enough. I can't see it crashing that often, if at all, but I could be wrong. It's been known to happen.
-
-Enjoy.
+ Award-Bot
+ CommentRemover (on the command line, `submod -h`)
+ ModMailArchiver (you'll need to run this one like a script with `python archiver.py file`, the file being a .txt file with a list of user names)

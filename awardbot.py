@@ -4,7 +4,7 @@ import sys
 import praw
 import time
 # Rename your constants.py to config.py
-from config import *
+import constants
 from multiprocessing import Process
 from praw.models import Submission
 
@@ -216,16 +216,16 @@ class CommentsStream(Login):
                 f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: award award. {URL}{comment.permalink}.\n")
             return False
 
-        # Refresh to get replies, check replies to see if they've already awarded the parent comment before. If they have, Fail
-        parent.refresh()
-        # If there are actually replies, let's check them. If not, we skip this.
-        if len(parent.replies) > 0:
-            for reply in parent.replies:
-                if reply.body == TRIGGER and str(reply.author) == author and reply.id != comment.id:
-                    comment.reply(MESSAGE_CODES['E15'])
-                    with open(LOG_FILE, 'a') as f:
-                        f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: already awarded. {URL}{comment.permalink}.\n")
-                    return False
+        # # Refresh to get replies, check replies to see if they've already awarded the parent comment before. If they have, Fail
+        # parent.refresh()
+        # # If there are actually replies, let's check them. If not, we skip this.
+        # if len(parent.replies) > 0:
+        #     for reply in parent.replies:
+        #         if reply.body == TRIGGER and str(reply.author) == author and reply.id != comment.id:
+        #             comment.reply(MESSAGE_CODES['E15'])
+        #             with open(LOG_FILE, 'a') as f:
+        #                 f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: already awarded. {URL}{comment.permalink}.\n")
+        #             return False
 
         ####
         # May possibly need this, in the event of missing comments (but not deleted). Only happened to me once, but it's apparently a thing.
