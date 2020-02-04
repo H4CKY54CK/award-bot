@@ -4,7 +4,7 @@ import sys
 import praw
 import time
 # Rename your constants.py to config.py
-import constants
+from constants import *
 from multiprocessing import Process
 from praw.models import Submission
 
@@ -95,7 +95,7 @@ class Login:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(MESSAGE_CODES['E01'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award {comment.id} by {chauthor} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} on {parent.id} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
 
             # If the user advanced to the max level, they get the invite.
             if new_flair == MAX_LEVEL:
@@ -216,16 +216,19 @@ class CommentsStream(Login):
                 f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: award award. {URL}{comment.permalink}.\n")
             return False
 
-        # # Refresh to get replies, check replies to see if they've already awarded the parent comment before. If they have, Fail
-        # parent.refresh()
-        # # If there are actually replies, let's check them. If not, we skip this.
-        # if len(parent.replies) > 0:
-        #     for reply in parent.replies:
-        #         if reply.body == TRIGGER and str(reply.author) == author and reply.id != comment.id:
-        #             comment.reply(MESSAGE_CODES['E15'])
-        #             with open(LOG_FILE, 'a') as f:
-        #                 f.write(f"{time.time()}: Award {comment.id} by {author} denied. Reason: already awarded. {URL}{comment.permalink}.\n")
-        #             return False
+        # Check if the user has already !awarded this comment SUCCESSFULLY
+        msg = f"grep -q 'by {author} on {parent.id}' {LOG_FILE} | grep 'Award' | grep 'successfully processed'; echo $?"
+        entry = os.popen(msg).read().strip('\n')
+
+        # If the grep returns `1`, it didn't find a match. Return `True`
+        if entry == '1':
+            return True
+
+        # Anything else, return False
+        return False
+
+
+
 
         ####
         # May possibly need this, in the event of missing comments (but not deleted). Only happened to me once, but it's apparently a thing.
