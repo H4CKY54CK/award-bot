@@ -53,7 +53,7 @@ def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
     bot = ModBot(AR)
-    parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify comments/submission (can take multiple users)")
+    parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify modmail conversations)")
     parser.set_defaults(func=bot.archive)
     args = parser.parse_args(argv)
 
