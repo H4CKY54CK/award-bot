@@ -224,10 +224,10 @@ class CommentsStream(Login):
 
         # If the grep returns `1`, it didn't find a match. Return `True`
         if entry == '1':
-            return True
+            return False
 
         # Anything else, return False
-        return False
+        return True
 
         ####
         # May possibly need this, in the event of missing comments (but not deleted). Only happened to me once, but it's apparently a thing.
