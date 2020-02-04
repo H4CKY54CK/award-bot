@@ -112,7 +112,7 @@ class Login:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(MESSAGE_CODES['E01'])
             with open(LOG_FILE, 'a') as f:
-                f.write(f"{time.time()}: Award {comment.id} by {chauthor} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
+                f.write(f"{time.time()}: Award {comment.id} by {chauthor} on {parent.id} successfully processed. {author} increased to {new_flair}. {URL}{comment.permalink}.\n")
 
         # If it's not max, and not one of the levels, and they definitely have one, then logic says they must have a custom flair.
         elif len(flair) > 0:
@@ -219,15 +219,10 @@ class CommentsStream(Login):
             return False
 
         # Check if the user has already !awarded this comment SUCCESSFULLY
-        msg = f"grep -q 'by {author} on {parent.id}' {LOG_FILE} | grep 'Award' | grep 'successfully processed'; echo $?"
+        msg = f"grep -q 'by {author} on {parent.id} successfully processed' {LOG_FILE}; echo $?"
         entry = os.popen(msg).read().strip('\n')
-
-        # If the grep returns `1`, it didn't find a match. Return `True`
-        if entry == '1':
+        if entry == '0':
             return False
-
-        # Anything else, return False
-        return True
 
         ####
         # May possibly need this, in the event of missing comments (but not deleted). Only happened to me once, but it's apparently a thing.
