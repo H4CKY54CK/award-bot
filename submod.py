@@ -89,7 +89,7 @@ class ModBot:
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
-    bot = ModBot(CR)
+    bot = ModBot(AR)
     parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify comments/submission (can take multiple users)")
     parser.add_argument('-c', '--comments', dest='submissions', action='store_false', help="limit the search to comments (by default, searches for both comments and submissions)")
     parser.add_argument('-s', '--submissions', dest='comments', action='store_false', help="limit the search to submissions (by default, searches for both comments and submissions)")
