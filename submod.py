@@ -5,9 +5,12 @@ import sys
 import praw
 import time
 import argparse
+from archiverconfig import *
 from collections import defaultdict
 from praw.models import Comment, Submission
-from config import *
+
+
+
 
 class NameList(object):
     def __init__(self, names):
