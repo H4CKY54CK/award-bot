@@ -3,8 +3,10 @@ import re
 import sys
 import praw
 import time
-# Rename your constants.py to config.py
-from constants import *
+try:
+    from config import *
+except:
+    from constants import *
 from multiprocessing import Process
 from praw.models import Submission
 
@@ -226,9 +228,6 @@ class CommentsStream(Login):
 
         # Anything else, return False
         return False
-
-
-
 
         ####
         # May possibly need this, in the event of missing comments (but not deleted). Only happened to me once, but it's apparently a thing.
