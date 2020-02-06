@@ -4,60 +4,35 @@ import os
 import sys
 import praw
 import time
-import argparse
-from archiverconfig import *
-from collections import defaultdict
-from praw.models import Comment, Submission
+from datetime import datetime
+import archiverconfig as arcon
 
-class NameList(object):
-    def __init__(self, names):
-        self.names = names
-
-    def __contains__(self, name):
-        return name.lower() in (n.lower() for n in self.names)
-
-    def add(self, name):
-        self.names.append(name)
 
 class ModBot:
 
     def __init__(self, site):
 
         self.reddit = praw.Reddit(site)
-        self.subreddit = self.reddit.subreddit(self.reddit.config.custom['test_subreddit'])
+        self.subreddit = self.reddit.subreddit(self.reddit.config.custom['subreddit'])
 
-    def archive(self, args=None):
+    def archive(self):
 
-        if os.path.exists(include):
-            with open(include) as f:
-                extras = f.read()
-            extras = extras.split('\n')
-
-        users = NameList(args.user)
-
-        for i in extras:
-            users.append(i)
+        users = arcon.include
+        msgs = {value:key for key, value in users.items()}
             
         conversations = self.subreddit.modmail.conversations()
         for conv in conversations:
-            authors = []
             for author in conv.authors:
-                if str(author).lower() in users and conv.unread:
+                user_name = str(author).lower()
+                if user_name in users and conv.unread:
+                    conv = self.subreddit.modmail(conv.id)
+                    conv.reply(users[user_name])
                     conv.mute()
-                    conv.read()
                     conv.archive()
-                    print(f"{str(author)} found in {conv}. Muted, read, archived.")
+                    with open(arcon.log, "a") as f:
+                        time_now = time.time()
+                        f.write(f"{datetime.fromtimestamp(time_now)} ({time_now}): {user_name} found in modmail conversation. Replied, muted, marked read, and archived.\n")
                     break
 
-def main(argv=None):
-    argv = (argv or sys.argv)[1:]
-    parser = argparse.ArgumentParser()
-    bot = ModBot(AR)
-    parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify modmail conversations)")
-    parser.set_defaults(func=bot.archive)
-    args = parser.parse_args(argv)
-
-    args.func(args)
-
 if __name__ == '__main__':
-    sys.exit(main())
+    ModBot(arcon.AR).archive()

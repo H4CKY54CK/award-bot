@@ -1,5 +1,11 @@
 # Site 3 from your `praw.ini` (AKA app number 3)
-AR = ""
+AR = "default"
 
-# Path to txt file with list of users to include in the modmail archiving.
-include = ""
+# Path to log
+log = "archiver_log.txt"
+
+# List of users to target in modmail
+include = {
+"user1": "you've been selected for this action",
+"user2": "same deal",
+}
