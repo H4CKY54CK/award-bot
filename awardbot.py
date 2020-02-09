@@ -3,14 +3,12 @@ import re
 import sys
 import praw
 import time
-import pickle
 try:
     from config import *
 except:
     from constants import *
 from multiprocessing import Process
 from praw.models import Submission
-from collections import defaultdict
 
 
 class Login:
@@ -20,23 +18,6 @@ class Login:
 
         self.reddit = praw.Reddit(site)
         self.subreddit = self.reddit.subreddit(self.reddit.config.custom['subreddit'])
-
-
-    def queue(self, user, award):
-
-        if not os.path.exists(QUEUE_FILE):
-            from collections import defaultdict
-            data = defaultdict(list)
-        else:
-            data = pickle.load(open(QUEUE_FILE, 'rb'))
-        book = data[user]
-        if len(book) < 3:
-            book.append(award)
-            status = "OK"
-        else:
-            status = False
-        pickle.dump(data, open(QUEUE_FILE, 'wb'))
-        return status
 
 
     def unprocessed(self, submission):
@@ -71,13 +52,13 @@ class Login:
             user_level = REVERSE_FLAIRS[flair]
             new_flair = FLAIR_LEVELS[user_level+1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            submission.reply(MESSAGE_CODES['E04'])
+            submission.reply(MESSAGE_CODES['E31'])
             with open(LOG_FILE, 'a') as f:
                 f.write(f"{time.time()}: Submission {submission.id} by {author} successfully processed. {author} increased to {new_flair}. {URL}{submission.permalink}.\n")
         elif flair == None or flair == '':
             new_flair = FLAIR_LEVELS[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            submission.reply(MESSAGE_CODES['E04'])
+            submission.reply(MESSAGE_CODES['E31'])
             with open(LOG_FILE, 'a') as f:
                 f.write(f"{time.time()}: Submission {submission.id} by {author} successfully processed. {author} increased to {new_flair}. {URL}{submission.permalink}.\n")
         elif len(flair) > 0:
@@ -164,18 +145,9 @@ class CommentsStream(Login):
                         if self.check_comment(comment):
                             # Send for processing.
                             self.process_comment(comment)
-                    else:
-                        if self.check_comment(comment):
-                            author = str(comment.author)
-                            qadd = {"awarder": comment.id, "awardee": comment.parent().id, "created": comment.created_utc}
-                            response = self.queue(author, qadd)
-                            if response == "OK":
-                                comment.reply(MESSAGE_CODES['E05'])
-                            else:
-                                comment.reply(MESSAGE_CODES['E31'])
 
         # If something happens and we get an error, send itself right back the start of this function, and log the error.
-        except Exception:
+        except:
             e = sys.exc_info()[0]
             with open(ERROR_LOG, 'a') as f:
                 f.write(f"{e}\n\n")
@@ -334,20 +306,6 @@ class KarmaCheck(Login):
                         with open(LOG_FILE, 'a') as f:
                             f.write(f"{time.time()}: Private message from {author} denied. Reason: not-top-lvl.\n")
                         msg.mark_read()
-
-        if not os.path.exists(QUEUE_FILE):
-            from collections import defaultdict
-            data = defaultdict(list)
-        else:
-            data = pickle.load(open(QUEUE_FILE, 'rb'))
-            for key in data:
-                user = data[key]
-                for item in user:
-                    if item['created'] + COOLDOWN_AMOUNT < time.time():
-                        comment = self.reddit.comment(item['awarder'])
-                        self.process_comment(comment)
-                        user.remove(item)
-        pickle.dump(data, open(QUEUE_FILE, 'wb'))
 
 
     def process_message(self, msg):

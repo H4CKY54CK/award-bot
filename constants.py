@@ -1,7 +1,7 @@
 # Basic/General Info
 
-KC = "aufb-one"
-CT = "aufb-two"
+KC = ""
+CT = ""
 CR = ""
 
 # Keyword to trigger the bot
@@ -21,7 +21,6 @@ COOLDOWN_AMOUNT = 28800.0
 # Timeframe for self posts (in seconds)
 TIMEFRAME = 604800
 # Also, I don't think this will be relevant in any way, but there is about a 5 minute difference between reddit's time server and mine.
-QUEUE_FILE = "queue.pkl"
 
 
 
@@ -32,8 +31,6 @@ MESSAGE_CODES = {
     'E01': "Your `!award` has been recorded.",
     'E02': "I've assigned your flair.",
     'E03': "I've assigned your flair. However, it was longer than Reddit's flair text limit of 64 characters and was cut short.",
-    'E04': "Congratulations! You've acquired enough karma on this submission to earn yourself a levelup!",
-    'E05': "You are still on cooldown, so your !award has been added to your queue.",
     'E11': "Only comments can be `!award`ed, not submissions.",
     'E12': "You cannot `!award` yourself.",
     'E13': "You cannot `!award` other `!award`s.",
@@ -44,7 +41,7 @@ MESSAGE_CODES = {
     'E21': "I could not assign your flair due to illegal characters in your message. (If it's not on a generic 104 key keyboard, you can't use it.",
     'E22': "You lack the required level to assign yourself a custom flair.",
     'E23': "A multi-line message cannot be assigned as a flair.",
-    'E31': "Queues are limited to 3 items max.",
+    'E31': "Congratulations! You've acquired enough karma on this submission to earn yourself a levelup!"
 }
 
 # Flair Levels (Dynamically adjustable, although with some side effects and/or a tad bit of assembly required)
