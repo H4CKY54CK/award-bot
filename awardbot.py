@@ -203,7 +203,7 @@ class CommentsStream(Login):
             rem = (float(last_award) + COOLDOWN_AMOUNT) - time.time()
             readable = convert(rem)
             coolmsg = f"{MESSAGE_CODES['E16']} Remaining: {readable}"
-            comment.reply(coolmsg)
+            # comment.reply(coolmsg)
             with open(LOG_FILE, 'a') as f:
                 f.write(f"{time.time()}: Award {comment.id} by {str(comment.author)} denied. Reason: on cooldown. {URL}{comment.permalink}.\n")
             return True
@@ -310,6 +310,8 @@ class KarmaCheck(Login):
 
         # Check our inbox for new messages
         for msg in self.reddit.inbox.all():
+            if msg is None or msg.distinguished:
+                continue
             if msg.new:
                 author = str(msg.author)
                 valid_user = re.match(valid, author)
