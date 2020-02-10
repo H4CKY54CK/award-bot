@@ -20,7 +20,7 @@ class ModBot:
 
         users = arcon.include
         msgs = {value:key for key, value in users.items()}
-        for k,v in users:
+        for k,v in users.items():
             if v is None:
                 users.update({k:random.choice(arcon.RANMSG)})
             
