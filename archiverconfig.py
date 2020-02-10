@@ -1,17 +1,15 @@
 # Site 3 from your `praw.ini` (AKA app number 3)
-AR = "default"
+AR = ""
 
 # Path to log
-log = "archiver_log.txt"
+log = ""
 
 # List of users to target in modmail
 include = {
-"user1": "you've been selected for this action",
-"user2": "same deal",
-"user3": None,
+"user1": None,
 }
 
 RANMSG = [
-'message 1',
-"message 'two'",
+,
+"You're dumb.",
 ]

@@ -26,16 +26,22 @@ class ModBot:
             
         conversations = self.subreddit.modmail.conversations()
         for conv in conversations:
+            usernames = []
             for author in conv.authors:
-                user_name = str(author).lower()
-                if user_name in users and conv.unread:
+                if author not in usernames:
+                    usernames.append(author)
+            for user in users:
+                if user in usernames and conv.unread:
                     conv = self.subreddit.modmail(conv.id)
-                    conv.reply(users[user_name])
+                    conv.reply(users[user])
+                    print(f"Replied to {user}")
                     conv.mute()
+                    print(f"{user} muted")
                     conv.archive()
+                    print(f"{conv.id} archived")
                     with open(arcon.log, "a") as f:
                         time_now = time.time()
-                        f.write(f"{datetime.fromtimestamp(time_now)} ({time_now}): {user_name} found in modmail conversation. Replied, muted, marked read, and archived.\n")
+                        f.write(f"{datetime.fromtimestamp(time_now)} ({time_now}): {user} found in modmail conversation. Replied, muted, marked read, and archived.\n")
                     break
 
 if __name__ == '__main__':
