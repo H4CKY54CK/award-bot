@@ -8,4 +8,10 @@ log = "archiver_log.txt"
 include = {
 "user1": "you've been selected for this action",
 "user2": "same deal",
+"user3": None,
 }
+
+RANMSG = [
+'message 1',
+"message 'two'",
+]

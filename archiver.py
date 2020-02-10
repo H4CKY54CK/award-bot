@@ -4,6 +4,7 @@ import os
 import sys
 import praw
 import time
+import random
 from datetime import datetime
 import archiverconfig as arcon
 
@@ -19,6 +20,9 @@ class ModBot:
 
         users = arcon.include
         msgs = {value:key for key, value in users.items()}
+        for k,v in users:
+            if v is None:
+                users.update({k:random.choice(arcon.RANMSG)})
             
         conversations = self.subreddit.modmail.conversations()
         for conv in conversations:
