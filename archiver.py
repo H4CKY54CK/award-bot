@@ -6,7 +6,10 @@ import praw
 import time
 import random
 from datetime import datetime
-import archiverconfig as arcon
+try:
+    import arconfig as arcon
+except:
+    import archiverconfig as arcon
 
 
 class ModBot:
