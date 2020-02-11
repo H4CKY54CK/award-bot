@@ -5,12 +5,14 @@ import sys
 import praw
 import time
 import argparse
-from archiverconfig import *
+# Rename your archiverconfig.py to arconfig.py so we can import yours.
+try:
+    import arconfig as arcon
+# That way, the config can be freely edited by the developer, and won't wipe the user's current settings.
+except:
+    import archiverconfig as arcon
 from collections import defaultdict
 from praw.models import Comment, Submission
-
-
-
 
 class NameList(object):
     def __init__(self, names):
@@ -89,7 +91,7 @@ class ModBot:
 def main(argv=None):
     argv = (argv or sys.argv)[1:]
     parser = argparse.ArgumentParser()
-    bot = ModBot(AR)
+    bot = ModBot(arcon.AR)
     parser.add_argument('user', type=str, nargs='*', help="user(s) for whom you wish to identify comments/submission (can take multiple users)")
     parser.add_argument('-c', '--comments', dest='submissions', action='store_false', help="limit the search to comments (by default, searches for both comments and submissions)")
     parser.add_argument('-s', '--submissions', dest='comments', action='store_false', help="limit the search to submissions (by default, searches for both comments and submissions)")

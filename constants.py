@@ -1,7 +1,7 @@
 # Basic/General Info
 
-KC = "aufb-one"
-CT = "aufb-two"
+KC = ""
+CT = ""
 CR = ""
 
 # Keyword to trigger the bot
@@ -23,10 +23,7 @@ TIMEFRAME = 604800
 # Also, I don't think this will be relevant in any way, but there is about a 5 minute difference between reddit's time server and mine.
 QUEUE_FILE = "queue.pkl"
 
-
-
-# Replies. (I need to verify the illegal characters thing, if there even are any, and I'll quick-edit the other one in soon.)
-
+# Error message codes.
 MESSAGE_CODES = {
     'E00': "I've encountered an unexpected error.",
     'E01': "Your `!award` has been recorded.",
@@ -48,7 +45,6 @@ MESSAGE_CODES = {
 }
 
 # Flair Levels (Dynamically adjustable, although with some side effects and/or a tad bit of assembly required)
-
 FLAIR_LEVELS={
     1: 'Level 1',
     2: 'Level 2',
