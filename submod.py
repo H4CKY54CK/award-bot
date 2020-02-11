@@ -27,7 +27,7 @@ class ModBot:
     def __init__(self, site):
 
         self.reddit = praw.Reddit(site)
-        self.subreddit = self.reddit.subreddit(self.reddit.config.custom['test_subreddit'])
+        self.subreddit = self.reddit.subreddit(self.reddit.config.custom['subreddit'])
 
     def verify(self, coll, args=None, kind=None):
 

@@ -1,13 +1,20 @@
 #! /usr/bin/python3
 
+"""
+Functioning as intended. Don't modify. (Future self note.)
+... immediately followed by me modifying it... super
+"""
+
 import os
 import sys
 import praw
 import time
 import random
 from datetime import datetime
+# Rename your archiverconfig.py to arconfig.py so we can import yours.
 try:
     import arconfig as arcon
+# That way, the config can be freely edited by the developer, and won't wipe the user's current settings.
 except:
     import archiverconfig as arcon
 
@@ -21,7 +28,7 @@ class ModBot:
 
     def archive(self):
 
-        users = arcon.include
+        users = arcon.INCLUDE
         msgs = {value:key for key, value in users.items()}
         for k,v in users.items():
             if v is None:
@@ -36,15 +43,40 @@ class ModBot:
             for user in users:
                 if user in usernames and conv.unread:
                     conv = self.subreddit.modmail(conv.id)
-                    conv.reply(users[user])
-                    print(f"Replied to {user}")
-                    conv.mute()
-                    print(f"{user} muted")
-                    conv.archive()
-                    print(f"{conv.id} archived")
-                    with open(arcon.log, "a") as f:
+
+                    r = False
+                    m = False
+                    a = False
+
+                    # Had issues with these if modmail conversation isn't brand new and untouched.
+                    # So, try each action, and just carry on if something happens. Not very elegant, but hey
+
+                    try:
+                        conv.reply(users[user])
+                        r = True
+                    except:
+                        pass
+
+                    try:
+                        conv.mute()
+                        m = True
+                    except:
+                        pass
+
+                    try:
+                        conv.archive()
+                        a = True
+                    except:
+                        pass
+
+                    # Had issues with replying, muting and archiving a modmail conversation that has been opened/something/idk
+                    # Therefore, rather than print 3 messages per action like before, just deliver a report based on what went through
+                    report = f"Found: {user.lower()} | Replied to? {r} | Muted? {m} | Archived? {a}"
+                    print(report)
+
+                    with open(arcon.LOG, "a") as f:
                         time_now = time.time()
-                        f.write(f"{datetime.fromtimestamp(time_now)} ({time_now}): {user} found in modmail conversation. Replied, muted, marked read, and archived.\n")
+                        f.write(f"{datetime.fromtimestamp(time_now)} / ({time_now}): {report}\n")
                     break
 
 if __name__ == '__main__':
