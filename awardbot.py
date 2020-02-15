@@ -91,8 +91,8 @@ class Login:
         comment = self.reddit.comment(comment)
         # Instantiate an instance of the parent comment, so we can treat it like any other comment.
         parent = self.reddit.comment(comment.parent())
-        author = str(comment.parent().author)
-        flair = comment.parent().author_flair_text
+        author = str(parent_id.author)
+        flair = parent_id.author_flair_text
         chauthor = str(comment.author)
 
         # Set the image flair to an empty string, because it is a required parameter to set a flair, even though we're only setting the text.
@@ -167,7 +167,7 @@ class CommentsStream(Login):
                     else:
                         if self.check_comment(comment):
                             author = str(comment.author)
-                            qadd = {"awarder": comment.id, "awardee": comment.parent().id, "created": comment.created_utc}
+                            qadd = {"awarder": comment.id, "awardee": comment.parent_id, "created": comment.created_utc}
                             response = self.queue(author, qadd)
                             if response == "OK":
                                 comment.reply(MESSAGE_CODES['E05'])
