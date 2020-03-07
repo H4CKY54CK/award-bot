@@ -2,7 +2,6 @@
 v1/archiver.py
 v1/archiverconfig.py
 v1/award_log.txt
-v1/awardbot.py
 v1/constants.py
 v1/queue.pkl
 v1/README.md
