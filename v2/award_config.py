@@ -1,8 +1,10 @@
-PRIMARY = ''
-SECONDARY = ''
+PRIMARY = 'mhcp1'
+SECONDARY = 'mhcp2'
 BOOK = 'queue.json'
 KEYWORD = '!award'
 COOLDOWN = 86400
+
+LOGS = 'logs.txt'
 
 FLAIR_LEVELS={
     1: 'Level 1',

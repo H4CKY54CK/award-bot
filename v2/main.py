@@ -28,7 +28,6 @@ class Bot:
                 state = self.check(comment)
                 if type(state) == str:
                     comment.reply(state)
-                    continue
                 else:
                     self.process_comment(comment)
 
@@ -37,19 +36,19 @@ class Bot:
         data = json.load(open(BOOK))
         recent = data['recent']
         user = str(comment.author)
+        parent = comment.parent()
+        parent_id = comment.parent_id
+        parent_user = str(parent.author)
         if user in recent.keys():
             last = recent[user].get('created', 0)
             awarded = recent[user].get('awarded', [])
         else:
             last = 0
             awarded = []
-        parent = comment.parent_id
-        if parent in awarded:
+        if parent_id in awarded:
             return DUPLICATE
-        if parent.startswith('t3'):
+        if parent_id.startswith('t3'):
             return POST
-        parent = comment.parent()
-        parent_user = str(parent.author)
         if user == parent_user:
             return SELF_AWARD
         if parent_user == self.THEBOT:
@@ -63,6 +62,8 @@ class Bot:
                 queue.update({user:{}})
             queue[user].update({comment.id: {'created': comment.created_utc}})
             json.dump(data, open(BOOK, 'w'), indent=4)
+            with open(LOGS, 'a') as f:
+                f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {comment.id} entered into queue.")
             return QUEUEDOWN + f"{datetime.timedelta(seconds=remaining)})"
 
         return True
@@ -82,6 +83,8 @@ class Bot:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(RECORDED)
             self.add(comment)
+            with open(LOGS, 'a') as f:
+                f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} has been incremented one level, courtesy of {chauthor}.\n")
             if new_flair == MAX_LEVEL:
                 self.reddit.redditor(author).message(INVITE_SUBJECT, INVITE_BODY)
         elif flair == None or flair == '':
@@ -89,6 +92,8 @@ class Bot:
             self.subreddit.flair.set(author, new_flair, flair_class)
             comment.reply(RECORDED)
             self.add(comment)
+            with open(LOGS, 'a') as f:
+                f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} has been incremented one level, courtesy of {chauthor}.\n")
         elif len(flair) > 0:
             comment.reply(CUSTOM_FLAIR)
 
@@ -167,11 +172,15 @@ class Bot:
                     self.subreddit.flair.set(author, new_flair, flair_class)
                     msg.reply(EXCEEDED + f" Old: {old_flair} | New: {new_flair}")
                     msg.mark_read()
+                    with open(LOGS, 'a') as f:
+                        f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} user flair has been changed. Source: inbox. Old flair: {old_flair} | New flair: {new_flair}.\n")
                 else:
                     old_flair = self.flairs[author]
                     self.subreddit.flair.set(author, new_flair, flair_class)
                     msg.reply(FLAIR_CHANGED + f" {old_flair} | New: {new_flair}")
                     msg.mark_read()
+                    with open(LOGS, 'a') as f:
+                        f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} user flair has been changed. Source: inbox. Old flair: {old_flair} | New flair: {new_flair}.\n")
             else:
                 msg.reply(ILLEGAL)
                 msg.mark_read()
@@ -189,10 +198,14 @@ class Bot:
             new_flair = FLAIR_LEVELS[user_level+1]
             self.subreddit.flair.set(author, new_flair, flair_class)
             submission.reply(SUBMISSION_KARMA)
+            with open(LOGS, 'a') as f:
+                f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} incremented one level. Source: Submission threshold met. {submission.id}.\n")
         elif flair == None or flair == '':
             new_flair = FLAIR_LEVELS[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
             submission.reply(SUBMISSION_KARMA)
+            with open(LOGS, 'a') as f:
+                f.write(f"{datetime.datetime.fromtimestamp(time.time())}: {author} incremented one level. Source: Submission threshold met. {submission.id}.\n")
         elif len(flair) > 0:
             pass
 
