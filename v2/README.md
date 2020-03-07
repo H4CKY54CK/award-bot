@@ -1,3 +1,9 @@
+Quick Notes:
+    It will create it's own data file. Don't worry about it.
+    It will maintain it's own data file. Don't worry about that either.
+    It _might_ populate it's own history based on what your current award bot has collected. I dunno yet. Gotta think that one out.
+    Look at how lean it is! ermagerd
+
 # What's new?
 
 - This is version 2 of the award bot. It's leaner and faster. It's also a rough draft, so it will need it's data files populated with everything from the launch of the first one, to now. I realize this is not ideal, but that's something I can do by hand. I don't mind. Just give this one a chance to show you what it's capable of, and I'm sure you'll love it.

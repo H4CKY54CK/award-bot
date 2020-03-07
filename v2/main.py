@@ -4,38 +4,9 @@ import json
 import praw
 import time
 import datetime
+from award_config import *
 from multiprocessing import Process
 
-
-PRIMARY = ''
-SECONDARY = ''
-BOOK = 'queue.json'
-KEYWORD = '!award'
-COOLDOWN = 86400
-
-FLAIR_LEVELS={
-    1: 'Level 1',
-    2: 'Level 2',
-    3: 'Level 3',
-    4: 'Level 4',
-    5: 'Level 5',
-    6: 'Max Level',
-}
-
-REVERSE_FLAIRS = {a:b for b, a in FLAIR_LEVELS.items()}
-FLAIR_VALUES = FLAIR_LEVELS.values()
-MAX_LEVEL = FLAIR_LEVELS[len(FLAIR_LEVELS)]
-
-TIMEFRAME = 604800.0
-KARMA = 100
-
-class Denied:
-    cooldown = f"Your !award has been added to the queue because you are still on cooldown. (Time remaining: "
-    duplicate = "You have already !awarded this comment."
-    post = "Only other comments can be !awarded."
-    self_award = "You can't !award yourself."
-    bot = "You can't !award the bot."
-    award = "You can't !award other !awards."
 
 class Bot:
 
@@ -74,17 +45,17 @@ class Bot:
             awarded = []
         parent = comment.parent_id
         if parent in awarded:
-            return Denied.duplicate
+            return DUPLICATE
         if parent.startswith('t3'):
-            return Denied.post
+            return POST
         parent = comment.parent()
         parent_user = str(parent.author)
         if user == parent_user:
-            return Denied.self_award
+            return SELF_AWARD
         if parent_user == self.THEBOT:
-            return Denied.bot
+            return BOT_AWARD
         if parent.body == KEYWORD:
-            return Denied.award
+            return AWARD_AWARD
         if last + COOLDOWN > comment.created_utc:
             remaining = (last + COOLDOWN) - comment.created_utc
             queue = data['queue']
@@ -92,7 +63,7 @@ class Bot:
                 queue.update({user:{}})
             queue[user].update({comment.id: {'created': comment.created_utc}})
             json.dump(data, open(BOOK, 'w'), indent=4)
-            return Denied.cooldown + f"{datetime.timedelta(seconds=remaining)})"
+            return QUEUEDOWN + f"{datetime.timedelta(seconds=remaining)})"
 
         return True
 
@@ -104,22 +75,22 @@ class Bot:
         chauthor = str(comment.author)
         flair_class = ''
         if flair == MAX_LEVEL:
-            comment.reply("User already max level. But they appreciate your generosity.")
+            comment.reply(ALREADY_MAX)
         elif flair in FLAIR_VALUES:
             user_level = REVERSE_FLAIRS[flair]
             new_flair = FLAIR_LEVELS[user_level+1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            comment.reply("Award recorded. Thank you.")
+            comment.reply(RECORDED)
             self.add(comment)
             if new_flair == MAX_LEVEL:
-                self.reddit.redditor(author).message("Invite", "Invitation")
+                self.reddit.redditor(author).message(INVITE_SUBJECT, INVITE_BODY)
         elif flair == None or flair == '':
             new_flair = FLAIR_LEVELS[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            comment.reply("Award recorded. Thank you.")
+            comment.reply(RECORDED)
             self.add(comment)
         elif len(flair) > 0:
-            comment.reply("User has a custom flair already. But they appreciate your generosity.")
+            comment.reply(CUSTOM_FLAIR)
 
     def add(self, comment):
 
@@ -164,7 +135,7 @@ class Bot:
                         elif user_flair == MAX_LEVEL:
                             self.process_message(msg)
                         else:
-                            msg.reply("You lack the required level to assign yourself a custom flair.")
+                            msg.reply(LACK_LEVEL)
                             msg.mark_read()
             queue = data['queue']
             for user in queue:
@@ -186,7 +157,7 @@ class Bot:
         valid_body = re.match(valid, body)
         content = msg.body.split('\n')
         if len(content) > 1:
-            msg.reply("Multi-line message detected. Please try again.")
+            msg.reply(MULTI_LINE)
             msg.mark_read()
         elif len(content) == 1:
             if valid_body:
@@ -194,15 +165,15 @@ class Bot:
                 if len(msg.body) > 64:
                     old_flair = self.flairs[author]
                     self.subreddit.flair.set(author, new_flair, flair_class)
-                    msg.reply(f"Your flair text exceeded reddit's limit of 64 characters, but I assigned what I could. Old: {old_flair} | New: {new_flair}")
+                    msg.reply(EXCEEDED + f" Old: {old_flair} | New: {new_flair}")
                     msg.mark_read()
                 else:
                     old_flair = self.flairs[author]
                     self.subreddit.flair.set(author, new_flair, flair_class)
-                    msg.reply(f"Your flair has been set. Let me know if you change your mind! Old: {old_flair} | New: {new_flair}")
+                    msg.reply(FLAIR_CHANGED + f" {old_flair} | New: {new_flair}")
                     msg.mark_read()
             else:
-                msg.reply("Illegal characters detected. Please try again.")
+                msg.reply(ILLEGAL)
                 msg.mark_read()
 
     def process_submission(self, submission):
@@ -217,13 +188,28 @@ class Bot:
             user_level = REVERSE_FLAIRS[flair]
             new_flair = FLAIR_LEVELS[user_level+1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            submission.reply("You've acquired enough karma on this submission to earn yourself a level up!")
+            submission.reply(SUBMISSION_KARMA)
         elif flair == None or flair == '':
             new_flair = FLAIR_LEVELS[1]
             self.subreddit.flair.set(author, new_flair, flair_class)
-            submission.reply("You've acquired enough karma on this submission to earn yourself a level up!")
+            submission.reply(SUBMISSION_KARMA)
         elif len(flair) > 0:
             pass
+
+def backup_manager(b1,b2):
+    while True:
+        if not b1.is_alive():
+            b1 = Process(target=bot1.start_stream)
+            b1.daemon = True
+            b1.start()
+            b1.join()
+        if not b2.is_alive():
+            b2 = Process(target=bot2.start_checking)
+            b2.daemon = True
+            b2.start()
+            b2.join()
+        time.sleep(.1)
+
 
 if __name__ == '__main__':
     bot1 = Bot(PRIMARY)
@@ -236,3 +222,4 @@ if __name__ == '__main__':
     b2.start()
     b1.join()
     b2.join()
+    backup_manager(b1,b2)
