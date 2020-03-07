@@ -1,0 +1,3 @@
+Adjust script so that it can be a drop-in replacement for previous version. It should be able to work with the old config file(s).
+A better config setup.
+NO PICKLING. As fast as pickle is, it's insecure. Use JSON. Maybe even use JSON for the config. JSON JSON JSON.
